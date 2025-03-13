@@ -5,6 +5,7 @@ import { postFeedback } from "./feedback";
 export async function processPR(prUrl: string): Promise<void> {
   try {
     // Fetch PR diff
+    console.log("Processing PR:", prUrl);
     const diffResponse = await axios.get(`${prUrl}.diff`, {
       headers: { Authorization: `token ${process.env.GITHUB_TOKEN}` },
     });
@@ -36,52 +37,50 @@ export async function processPR(prUrl: string): Promise<void> {
       `### PR Analysis\n\n${feedback}\n\n### Change Flowchart\n\`\`\`mermaid\n${changeFlowchart}\n\`\`\`\n\n### Logical Flow\n\`\`\`mermaid\n${logicalFlowchart}\n\`\`\``
     );
   } catch (error) {
-    console.error(
-      "PR processing failed:",
-      "Error:",
-      JSON.stringify(error, null, 2)
-    );
+    console.error("PR processing failed:", "Error:", error);
   }
 }
 
-function parseDiff(
-  diff: string
-): { file: string; type: "add" | "remove"; line: string }[] {
+function parseDiff(diff: string): { file: string; type: "add" | "remove"; line: string }[] {
   const changes: { file: string; type: "add" | "remove"; line: string }[] = [];
-  let currentFile = "";
+  let currentFile: string | null = null;
 
-  diff.split("\n").forEach((line) => {
-    // Detect file name
+  const lines = diff.split("\n");
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i];
+
+    // Detect file changes
     if (line.startsWith("diff --git")) {
-      const match = line.match(/b\/([^\s]+)/); // Extracts correct file path
+      const match = line.match(/b\/(.+)/); // Improved to handle any filename
       if (match) {
-        currentFile = match[1]; // Store file name
+        currentFile = match[1].trim();
       }
     }
-    // Handle added lines
+
+    // Detect added lines (ignoring file metadata changes)
     else if (line.startsWith("+") && !line.startsWith("+++")) {
       if (currentFile) {
-        changes.push({
-          file: currentFile,
-          type: "add",
-          line: line.slice(1).trim(),
-        });
+        const addedLine = line.slice(1).trim();
+        if (addedLine.length > 0) {
+          changes.push({ file: currentFile, type: "add", line: addedLine });
+        }
       }
     }
-    // Handle removed lines
+
+    // Detect removed lines (ignoring file metadata changes)
     else if (line.startsWith("-") && !line.startsWith("---")) {
       if (currentFile) {
-        changes.push({
-          file: currentFile,
-          type: "remove",
-          line: line.slice(1).trim(),
-        });
+        const removedLine = line.slice(1).trim();
+        if (removedLine.length > 0) {
+          changes.push({ file: currentFile, type: "remove", line: removedLine });
+        }
       }
     }
-  });
+  }
 
-  return changes.filter((change) => change.line.length > 0); // Remove empty lines
+  return changes;
 }
+
 
 // Generates a Change Flowchart using Mermaid
 function generateChangeFlowchart(
