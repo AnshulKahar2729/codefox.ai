@@ -11,13 +11,19 @@ export async function postFeedback(
   const user = prUrl.split("/")[4];
   const repo = prUrl.split("/")[5];
   const prNumber = prUrl.split("/")[7];
+  const githubToken = process.env.GITHUB_TOKEN!;
 
   const commentUrl = `https://api.github.com/repos/${user}/${repo}/issues/${prNumber}/comments`;
   try {
     const { data } = await axios.post(
       commentUrl,
       { body },
-      { headers: { Authorization: `${process.env.GITHUB_TOKEN}` } }
+      {
+        headers: {
+          Authorization: `${githubToken}`,
+          Accept: "application/vnd.github.v3+json",
+        },
+      }
     );
 
     console.log("Feedback posted:", data);
