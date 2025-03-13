@@ -5,6 +5,7 @@ import { postFeedback } from "./feedback";
 export async function processPR(prUrl: string): Promise<void> {
   try {
     // Fetch PR diff
+    console.log("Processing PR:", prUrl);
     const diffResponse = await axios.get(`${prUrl}.diff`, {
       headers: { Authorization: `token ${process.env.GITHUB_TOKEN}` },
     });
@@ -36,52 +37,70 @@ export async function processPR(prUrl: string): Promise<void> {
       `### PR Analysis\n\n${feedback}\n\n### Change Flowchart\n\`\`\`mermaid\n${changeFlowchart}\n\`\`\`\n\n### Logical Flow\n\`\`\`mermaid\n${logicalFlowchart}\n\`\`\``
     );
   } catch (error) {
-    console.error(
-      "PR processing failed:",
-      "Error:",
-      JSON.stringify(error, null, 2)
-    );
+    console.error("PR processing failed:", "Error:", error);
   }
 }
 
-function parseDiff(
-  diff: string
-): { file: string; type: "add" | "remove"; line: string }[] {
+function parseDiff(diff: string): { file: string; type: "add" | "remove"; line: string }[] {
   const changes: { file: string; type: "add" | "remove"; line: string }[] = [];
-  let currentFile = "";
+  let currentFile: string | null = null;
 
-  diff.split("\n").forEach((line) => {
-    // Detect file name
-    if (line.startsWith("diff --git")) {
-      const match = line.match(/b\/([^\s]+)/); // Extracts correct file path
-      if (match) {
-        currentFile = match[1]; // Store file name
-      }
+  try {
+    if (!diff || typeof diff !== "string") {
+      console.error("parseDiff: Invalid diff input, expected a string.");
+      return [];
     }
-    // Handle added lines
-    else if (line.startsWith("+") && !line.startsWith("+++")) {
-      if (currentFile) {
-        changes.push({
-          file: currentFile,
-          type: "add",
-          line: line.slice(1).trim(),
-        });
-      }
-    }
-    // Handle removed lines
-    else if (line.startsWith("-") && !line.startsWith("---")) {
-      if (currentFile) {
-        changes.push({
-          file: currentFile,
-          type: "remove",
-          line: line.slice(1).trim(),
-        });
-      }
-    }
-  });
 
-  return changes.filter((change) => change.line.length > 0); // Remove empty lines
+    const lines = diff.split("\n");
+    for (let i = 0; i < lines.length; i++) {
+      const line = lines[i];
+
+      // Detect file changes
+      if (line.startsWith("diff --git")) {
+        const match = line.match(/b\/(.+)/); // Improved regex for filenames
+        if (match) {
+          currentFile = match[1].trim();
+        } else {
+          console.warn(`parseDiff: Unable to extract filename from line: ${line}`);
+        }
+      }
+
+      // Detect added lines (ignoring file metadata changes)
+      else if (line.startsWith("+") && !line.startsWith("+++")) {
+        if (currentFile) {
+          const addedLine = line.slice(1).trim();
+          if (addedLine.length > 0) {
+            changes.push({ file: currentFile, type: "add", line: addedLine });
+          } else {
+            console.warn(`parseDiff: Skipping empty added line at index ${i}.`);
+          }
+        } else {
+          console.error(`parseDiff: Found an added line but no file detected at index ${i}: ${line}`);
+        }
+      }
+
+      // Detect removed lines (ignoring file metadata changes)
+      else if (line.startsWith("-") && !line.startsWith("---")) {
+        if (currentFile) {
+          const removedLine = line.slice(1).trim();
+          if (removedLine.length > 0) {
+            changes.push({ file: currentFile, type: "remove", line: removedLine });
+          } else {
+            console.warn(`parseDiff: Skipping empty removed line at index ${i}.`);
+          }
+        } else {
+          console.error(`parseDiff: Found a removed line but no file detected at index ${i}: ${line}`);
+        }
+      }
+    }
+  } catch (error) {
+    console.error("parseDiff: Error while parsing diff:", error);
+  }
+
+  return changes;
 }
+
+
 
 // Generates a Change Flowchart using Mermaid
 function generateChangeFlowchart(
