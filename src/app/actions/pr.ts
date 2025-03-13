@@ -10,6 +10,7 @@ export async function processPR(prUrl: string): Promise<void> {
     console.log("Processing PR:", prUrl);
 
     const diffUrl = prUrl.replace("api.github.com/repos", "github.com");
+    console.log("Diff URL:", diffUrl);
     const diffResponse = await axios.get(`${diffUrl}.diff`, {
       headers: { Authorization: `token ${process.env.GITHUB_TOKEN}` },
     });
