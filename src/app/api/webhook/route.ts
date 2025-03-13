@@ -6,7 +6,7 @@ export async function POST(req: NextRequest) {
   try {
     // Read request body
     const body = await req.json();
-    console.log("Webhook payload:", body);
+    // console.log("Webhook payload:", body);
 
     // Validate request method
     if (req.method !== "POST") {
