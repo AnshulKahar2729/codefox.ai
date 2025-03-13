@@ -10,7 +10,7 @@ export async function processPR(prUrl: string): Promise<void> {
       headers: { Authorization: `token ${process.env.GITHUB_TOKEN}` },
     });
     console.log("Diff response:", diffResponse.status, diffResponse.statusText);
-    const diff = diffResponse.data;
+    const diff = JSON.stringify(diffResponse.data);
     console.log("Diff:", diff);
 
     // Parse diff changes
@@ -41,7 +41,9 @@ export async function processPR(prUrl: string): Promise<void> {
   }
 }
 
-function parseDiff(diff: string): { file: string; type: "add" | "remove"; line: string }[] {
+function parseDiff(
+  diff: string
+): { file: string; type: "add" | "remove"; line: string }[] {
   const changes: { file: string; type: "add" | "remove"; line: string }[] = [];
   let currentFile: string | null = null;
 
@@ -61,7 +63,9 @@ function parseDiff(diff: string): { file: string; type: "add" | "remove"; line: 
         if (match) {
           currentFile = match[1].trim();
         } else {
-          console.warn(`parseDiff: Unable to extract filename from line: ${line}`);
+          console.warn(
+            `parseDiff: Unable to extract filename from line: ${line}`
+          );
         }
       }
 
@@ -75,7 +79,9 @@ function parseDiff(diff: string): { file: string; type: "add" | "remove"; line: 
             console.warn(`parseDiff: Skipping empty added line at index ${i}.`);
           }
         } else {
-          console.error(`parseDiff: Found an added line but no file detected at index ${i}: ${line}`);
+          console.error(
+            `parseDiff: Found an added line but no file detected at index ${i}: ${line}`
+          );
         }
       }
 
@@ -84,12 +90,20 @@ function parseDiff(diff: string): { file: string; type: "add" | "remove"; line: 
         if (currentFile) {
           const removedLine = line.slice(1).trim();
           if (removedLine.length > 0) {
-            changes.push({ file: currentFile, type: "remove", line: removedLine });
+            changes.push({
+              file: currentFile,
+              type: "remove",
+              line: removedLine,
+            });
           } else {
-            console.warn(`parseDiff: Skipping empty removed line at index ${i}.`);
+            console.warn(
+              `parseDiff: Skipping empty removed line at index ${i}.`
+            );
           }
         } else {
-          console.error(`parseDiff: Found a removed line but no file detected at index ${i}: ${line}`);
+          console.error(
+            `parseDiff: Found a removed line but no file detected at index ${i}: ${line}`
+          );
         }
       }
     }
@@ -99,8 +113,6 @@ function parseDiff(diff: string): { file: string; type: "add" | "remove"; line: 
 
   return changes;
 }
-
-
 
 // Generates a Change Flowchart using Mermaid
 function generateChangeFlowchart(
