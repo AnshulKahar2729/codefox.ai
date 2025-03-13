@@ -6,10 +6,14 @@ export async function processPR(prUrl: string): Promise<void> {
   try {
     // Fetch PR diff
     // pr url - https://api.github.com/repos/AnshulKahar2729/ai-pull-request/pulls/9
-    // converted into - https://github.com/AnshulKahar2729/ai-pull-request/pull/9
+    // converted into and pulls into pull - https://github.com/AnshulKahar2729/ai-pull-request/pull/9
     console.log("Processing PR:", prUrl);
 
-    const diffUrl = prUrl.replace("api.github.com/repos", "github.com");
+    const user = prUrl.split("/")[4];
+    const repo = prUrl.split("/")[5];
+    const prNumber = prUrl.split("/")[7];
+
+    const diffUrl = `https://github.com/${user}/${repo}/pull/${prNumber}`;
     console.log("Diff URL:", diffUrl);
     const diffResponse = await axios.get(`${diffUrl}.diff`, {
       headers: { Authorization: `${process.env.GITHUB_TOKEN}` },
