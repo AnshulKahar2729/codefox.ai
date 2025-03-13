@@ -1,5 +1,5 @@
 import axios from "axios";
-import { analyzeDiff } from "./ai"; // AI-based logical flow generation
+import { analyzeDiff, generateLogicalFlow } from "./ai"; // AI-based logical flow generation
 // import { generateLogicalFlow } from "./ai";
 import { postFeedback } from "./feedback";
 
@@ -36,20 +36,20 @@ export async function processPR(prUrl: string): Promise<void> {
     console.log("Feedback:", feedback);
 
     // Generate Mermaid diagrams
-    // const changeFlowchart = generateChangeFlowchart(changes);
-    // console.log("Change Flowchart:", changeFlowchart);
-    // const logicalFlowchart = await generateLogicalFlow(changes); // AI-based logical diagram
-    // console.log("Logical Flowchart:", logicalFlowchart);
+    const changeFlowchart = generateChangeFlowchart(changes);
+    console.log("Change Flowchart:", changeFlowchart);
+    const logicalFlowchart = await generateLogicalFlow(changes); // AI-based logical diagram
+    console.log("Logical Flowchart:", logicalFlowchart);
 
     // Post feedback with AI analysis & diagrams
-    // await postFeedback(
-    //   prUrl,
-    //   `### PR Analysis\n\n${feedback}\n\n### Change Flowchart\n\`\`\`mermaid\n${changeFlowchart}\n\`\`\`\n\n### Logical Flow\n\`\`\`mermaid\n${logicalFlowchart}\n\`\`\``
-    // );
     const feedBackData = await postFeedback(
       prUrl,
-      `### PR Analysis\n\n${feedback}`
+      `### PR Analysis\n\n${feedback}\n\n### Change Flowchart\n\`\`\`mermaid\n${changeFlowchart}\n\`\`\`\n\n### Logical Flow\n\`\`\`mermaid\n${logicalFlowchart}\n\`\`\``
     );
+    // const feedBackData = await postFeedback(
+    //   prUrl,
+    //   `### PR Analysis\n\n${feedback}`
+    // );
     console.log("Feedback posted:", feedBackData);
     return feedBackData;
   } catch (error) {
@@ -132,26 +132,26 @@ function parseDiff(
 }
 
 // Generates a Change Flowchart using Mermaid
-// function generateChangeFlowchart(
-//   changes: { file: string; type: "add" | "remove"; line: string }[]
-// ): string {
-//   let diagram = "graph TD;\n";
-//   const fileChanges: Record<string, { adds: number; removes: number }> = {};
+function generateChangeFlowchart(
+  changes: { file: string; type: "add" | "remove"; line: string }[]
+): string {
+  let diagram = "graph TD;\n";
+  const fileChanges: Record<string, { adds: number; removes: number }> = {};
 
-//   changes.forEach((change) => {
-//     if (!fileChanges[change.file]) {
-//       fileChanges[change.file] = { adds: 0, removes: 0 };
-//     }
-//     if (change.type === "add") fileChanges[change.file].adds++;
-//     if (change.type === "remove") fileChanges[change.file].removes++;
-//   });
+  changes.forEach((change) => {
+    if (!fileChanges[change.file]) {
+      fileChanges[change.file] = { adds: 0, removes: 0 };
+    }
+    if (change.type === "add") fileChanges[change.file].adds++;
+    if (change.type === "remove") fileChanges[change.file].removes++;
+  });
 
-//   Object.entries(fileChanges).forEach(([file, { adds, removes }]) => {
-//     diagram += `  ${file}["${file}"] -->|Added: ${adds}, Removed: ${removes}| Changes;\n`;
-//   });
+  Object.entries(fileChanges).forEach(([file, { adds, removes }]) => {
+    diagram += `  ${file}["${file}"] -->|Added: ${adds}, Removed: ${removes}| Changes;\n`;
+  });
 
-//   return diagram;
-// }
+  return diagram;
+}
 
 // Handles @CodeFox mentions and AI responses
 export async function handleComment(payload: any): Promise<void> {
