@@ -45,41 +45,61 @@ function parseDiff(diff: string): { file: string; type: "add" | "remove"; line: 
   const changes: { file: string; type: "add" | "remove"; line: string }[] = [];
   let currentFile: string | null = null;
 
-  const lines = diff.split("\n");
-  for (let i = 0; i < lines.length; i++) {
-    const line = lines[i];
-
-    // Detect file changes
-    if (line.startsWith("diff --git")) {
-      const match = line.match(/b\/(.+)/); // Improved to handle any filename
-      if (match) {
-        currentFile = match[1].trim();
-      }
+  try {
+    if (!diff || typeof diff !== "string") {
+      console.error("parseDiff: Invalid diff input, expected a string.");
+      return [];
     }
 
-    // Detect added lines (ignoring file metadata changes)
-    else if (line.startsWith("+") && !line.startsWith("+++")) {
-      if (currentFile) {
-        const addedLine = line.slice(1).trim();
-        if (addedLine.length > 0) {
-          changes.push({ file: currentFile, type: "add", line: addedLine });
+    const lines = diff.split("\n");
+    for (let i = 0; i < lines.length; i++) {
+      const line = lines[i];
+
+      // Detect file changes
+      if (line.startsWith("diff --git")) {
+        const match = line.match(/b\/(.+)/); // Improved regex for filenames
+        if (match) {
+          currentFile = match[1].trim();
+        } else {
+          console.warn(`parseDiff: Unable to extract filename from line: ${line}`);
+        }
+      }
+
+      // Detect added lines (ignoring file metadata changes)
+      else if (line.startsWith("+") && !line.startsWith("+++")) {
+        if (currentFile) {
+          const addedLine = line.slice(1).trim();
+          if (addedLine.length > 0) {
+            changes.push({ file: currentFile, type: "add", line: addedLine });
+          } else {
+            console.warn(`parseDiff: Skipping empty added line at index ${i}.`);
+          }
+        } else {
+          console.error(`parseDiff: Found an added line but no file detected at index ${i}: ${line}`);
+        }
+      }
+
+      // Detect removed lines (ignoring file metadata changes)
+      else if (line.startsWith("-") && !line.startsWith("---")) {
+        if (currentFile) {
+          const removedLine = line.slice(1).trim();
+          if (removedLine.length > 0) {
+            changes.push({ file: currentFile, type: "remove", line: removedLine });
+          } else {
+            console.warn(`parseDiff: Skipping empty removed line at index ${i}.`);
+          }
+        } else {
+          console.error(`parseDiff: Found a removed line but no file detected at index ${i}: ${line}`);
         }
       }
     }
-
-    // Detect removed lines (ignoring file metadata changes)
-    else if (line.startsWith("-") && !line.startsWith("---")) {
-      if (currentFile) {
-        const removedLine = line.slice(1).trim();
-        if (removedLine.length > 0) {
-          changes.push({ file: currentFile, type: "remove", line: removedLine });
-        }
-      }
-    }
+  } catch (error) {
+    console.error("parseDiff: Error while parsing diff:", error);
   }
 
   return changes;
 }
+
 
 
 // Generates a Change Flowchart using Mermaid
