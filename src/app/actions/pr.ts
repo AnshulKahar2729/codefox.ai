@@ -12,7 +12,7 @@ export async function processPR(prUrl: string): Promise<void> {
     const diffUrl = prUrl.replace("api.github.com/repos", "github.com");
     console.log("Diff URL:", diffUrl);
     const diffResponse = await axios.get(`${diffUrl}.diff`, {
-      headers: { Authorization: `token ${process.env.GITHUB_TOKEN}` },
+      headers: { Authorization: `${process.env.GITHUB_TOKEN}` },
     });
     console.log("Diff response:", diffResponse.status, diffResponse.statusText);
     const diff = JSON.stringify(diffResponse.data);
