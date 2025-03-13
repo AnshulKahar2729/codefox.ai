@@ -22,7 +22,7 @@ export async function postFeedback(
       { body },
       {
         headers: {
-          Authorization: `${githubToken}`,
+          Authorization: `token ${githubToken}`,
           Accept: "application/vnd.github.v3+json",
         },
       }
