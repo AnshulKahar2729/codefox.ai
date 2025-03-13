@@ -38,18 +38,25 @@ export async function processPR(prUrl: string): Promise<void> {
     // Generate Mermaid diagrams
     const changeFlowchart = generateChangeFlowchart(changes);
     console.log("Change Flowchart:", changeFlowchart);
-    const logicalFlowchart = await generateLogicalFlow(changes); // AI-based logical diagram
-    console.log("Logical Flowchart:", logicalFlowchart);
+    // const logicalFlowchart = await generateLogicalFlow(changes); // AI-based logical diagram
+    // console.log("Logical Flowchart:", logicalFlowchart);
 
     // Post feedback with AI analysis & diagrams
-    const feedBackData = await postFeedback(
-      prUrl,
-      `### PR Analysis\n\n${feedback}\n\n### Change Flowchart\n\`\`\`mermaid\n${changeFlowchart}\n\`\`\`\n\n### Logical Flow\n\`\`\`mermaid\n${logicalFlowchart}\n\`\`\``
-    );
     // const feedBackData = await postFeedback(
     //   prUrl,
-    //   `### PR Analysis\n\n${feedback}`
+    //   `### PR Analysis\n\n${feedback}\n\n### Change Flowchart\n\`\`\`mermaid\n${changeFlowchart}\n\`\`\`\n\n### Logical Flow\n\`\`\`mermaid\n${logicalFlowchart}\n\`\`\``
     // );
+
+    // const feedBackData = await postFeedback(
+    //   prUrl,
+    //   `### PR Analysis\n\n${feedback}\n\n### Change Flowchart\n\`\`\`mermaid\n${changeFlowchart}\n\`\`\`\n\n### Logical Flow\n\`\`\`mermaid\n${logicalFlowchart}\n\`\`\``
+    // );
+
+    const feedBackData = await postFeedback(
+      prUrl,
+      `### PR Analysis\n\n${feedback}\n\n### Change Flowchart\n\`\`\`mermaid\n${changeFlowchart}\n\`\`\`\n\n`
+    );
+
     console.log("Feedback posted:", feedBackData);
     return feedBackData;
   } catch (error) {
