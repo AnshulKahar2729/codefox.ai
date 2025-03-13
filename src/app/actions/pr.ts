@@ -54,6 +54,7 @@ export async function processPR(prUrl: string): Promise<void> {
     return feedBackData;
   } catch (error) {
     console.error("PR processing failed:", "Error:", error);
+    console.error(JSON.stringify(error, null, 2));
   }
 }
 

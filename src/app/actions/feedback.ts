@@ -14,6 +14,8 @@ export async function postFeedback(
   const githubToken = process.env.GITHUB_TOKEN!;
 
   const commentUrl = `https://api.github.com/repos/${user}/${repo}/issues/${prNumber}/comments`;
+  console.log("Comment URL:", commentUrl);
+  console.log("GitHub Token:", githubToken);
   try {
     const { data } = await axios.post(
       commentUrl,
@@ -30,5 +32,6 @@ export async function postFeedback(
     return data;
   } catch (error) {
     console.error("Failed to post feedback:", error);
+    console.error(JSON.stringify(error, null, 2));
   }
 }
