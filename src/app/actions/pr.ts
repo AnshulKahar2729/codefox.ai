@@ -35,33 +35,58 @@ export async function processPR(prUrl: string): Promise<void> {
       prUrl,
       `### PR Analysis\n\n${feedback}\n\n### Change Flowchart\n\`\`\`mermaid\n${changeFlowchart}\n\`\`\`\n\n### Logical Flow\n\`\`\`mermaid\n${logicalFlowchart}\n\`\`\``
     );
-    
   } catch (error) {
-    console.error("PR processing failed:", "Error:", JSON.stringify(error, null, 2));
+    console.error(
+      "PR processing failed:",
+      "Error:",
+      JSON.stringify(error, null, 2)
+    );
   }
 }
 
-// Parses diff into structured changes
-function parseDiff(diff: string): { file: string; type: "add" | "remove"; line: string }[] {
+function parseDiff(
+  diff: string
+): { file: string; type: "add" | "remove"; line: string }[] {
   const changes: { file: string; type: "add" | "remove"; line: string }[] = [];
   let currentFile = "";
 
   diff.split("\n").forEach((line) => {
+    // Detect file name
     if (line.startsWith("diff --git")) {
       const match = line.match(/b\/([^\s]+)/); // Extracts correct file path
-      if (match) currentFile = match[1];
-    } else if (line.startsWith("+") && !line.startsWith("+++")) {
-      changes.push({ file: currentFile, type: "add", line: line.slice(1) });
-    } else if (line.startsWith("-") && !line.startsWith("---")) {
-      changes.push({ file: currentFile, type: "remove", line: line.slice(1) });
+      if (match) {
+        currentFile = match[1]; // Store file name
+      }
+    }
+    // Handle added lines
+    else if (line.startsWith("+") && !line.startsWith("+++")) {
+      if (currentFile) {
+        changes.push({
+          file: currentFile,
+          type: "add",
+          line: line.slice(1).trim(),
+        });
+      }
+    }
+    // Handle removed lines
+    else if (line.startsWith("-") && !line.startsWith("---")) {
+      if (currentFile) {
+        changes.push({
+          file: currentFile,
+          type: "remove",
+          line: line.slice(1).trim(),
+        });
+      }
     }
   });
 
-  return changes;
+  return changes.filter((change) => change.line.length > 0); // Remove empty lines
 }
 
 // Generates a Change Flowchart using Mermaid
-function generateChangeFlowchart(changes: { file: string; type: "add" | "remove"; line: string }[]): string {
+function generateChangeFlowchart(
+  changes: { file: string; type: "add" | "remove"; line: string }[]
+): string {
   let diagram = "graph TD;\n";
   const fileChanges: Record<string, { adds: number; removes: number }> = {};
 
@@ -91,6 +116,8 @@ export async function handleComment(payload: any): Promise<void> {
     return;
   }
 
-  const response = await analyzeDiff([{ file: "query", type: "query", line: query }]);
+  const response = await analyzeDiff([
+    { file: "query", type: "query", line: query },
+  ]);
   await postFeedback(prUrl, `Response to "@CodeFox ${query}":\n${response}`);
 }
