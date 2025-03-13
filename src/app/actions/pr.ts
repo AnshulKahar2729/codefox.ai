@@ -116,6 +116,9 @@ function parseDiff(
         }
       }
     }
+
+    console.log("parseDiff: Changes parsed successfully.");
+    return changes;
   } catch (error) {
     console.error("parseDiff: Error while parsing diff:", error);
   }
