@@ -14,6 +14,7 @@ export async function postFeedback(
     );
 
     console.log("Feedback posted:", data);
+    return data;
   } catch (error) {
     console.error("Failed to post feedback:",error);
   }
