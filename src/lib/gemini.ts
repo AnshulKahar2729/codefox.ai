@@ -13,7 +13,6 @@ const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY as string);
 export async function generateAIContent(
   prompt: string,
   modelId: string = "gemini-pro",
-  maxTokens: number = 400
 ): Promise<string> {
   try {
     // Load the AI model

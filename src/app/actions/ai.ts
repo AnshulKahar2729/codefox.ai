@@ -8,7 +8,7 @@ export async function analyzeDiff(
 }
 
 
-function generateSystemPrompt(
+/* function generateSystemPrompt(
   changes: { file: string; type: string; line: string }[]
 ): string {
   let prompt = `You are a highly experienced code reviewer and software architect. Analyze the following code changes provided from a GitHub Pull Request and generate a detailed summary. Your analysis should include:
@@ -31,7 +31,7 @@ Below are the code changes:\n\n`;
 
   return prompt;
 }
-
+ */
 export async function generateLogicalFlow(
   changes: { file: string; type: "add" | "remove"; line: string }[]
 ): Promise<string> {

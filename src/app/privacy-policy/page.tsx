@@ -17,7 +17,7 @@ export default function PrivacyPolicy() {
         <section className="mb-6">
           <h2 className="text-2xl font-semibold text-gray-800 mb-2">Introduction</h2>
           <p className="text-gray-600">
-            Welcome to AI Pull Requets Review ("we," "us," or "our"). This Privacy Policy explains how we collect, use, disclose, and protect your information when you use our AI-powered pull request review tool. We are committed to safeguarding your privacy and ensuring compliance with applicable laws and standards.
+            Welcome to AI Pull Requets Review  This Privacy Policy explains how we collect, use, disclose, and protect your information when you use our AI-powered pull request review tool. We are committed to safeguarding your privacy and ensuring compliance with applicable laws and standards.
           </p>
         </section>
 
@@ -110,7 +110,7 @@ export default function PrivacyPolicy() {
         <section className="mb-6">
           <h2 className="text-2xl font-semibold text-gray-800 mb-2">8. Changes to This Policy</h2>
           <p className="text-gray-600">
-            We may update this Privacy Policy periodically. Changes will be posted here with an updated "Last Updated" date. Significant changes will be communicated via email or app notifications.
+            We may update this Privacy Policy periodically. Changes will be posted here with an updated date. Significant changes will be communicated via email or app notifications.
           </p>
         </section>
 
