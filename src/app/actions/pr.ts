@@ -19,7 +19,7 @@ export async function processPR(prUrl: string): Promise<void> {
       headers: { Authorization: `${process.env.GITHUB_TOKEN}` },
     });
     console.log("Diff response:", diffResponse.status, diffResponse.statusText);
-    const diff = JSON.stringify(diffResponse.data);
+    const diff = diffResponse.data;
     console.log("Diff:", diff);
 
     // Parse diff changes
@@ -68,7 +68,7 @@ function parseDiff(
 
       // Detect file changes
       if (line.startsWith("diff --git")) {
-        const match = line.match(/b\/(.+)/); // Improved regex for filenames
+        const match = line.match(/b\/(.+)/); // Extract filename from diff line
         if (match) {
           currentFile = match[1].trim();
         } else {
@@ -78,7 +78,7 @@ function parseDiff(
         }
       }
 
-      // Detect added lines (ignoring file metadata changes)
+      // Detect added lines (ignoring metadata changes)
       else if (line.startsWith("+") && !line.startsWith("+++")) {
         if (currentFile) {
           const addedLine = line.slice(1).trim();
@@ -94,7 +94,7 @@ function parseDiff(
         }
       }
 
-      // Detect removed lines (ignoring file metadata changes)
+      // Detect removed lines (ignoring metadata changes)
       else if (line.startsWith("-") && !line.startsWith("---")) {
         if (currentFile) {
           const removedLine = line.slice(1).trim();
@@ -116,9 +116,6 @@ function parseDiff(
         }
       }
     }
-
-    console.log("parseDiff: Changes parsed successfully.");
-    return changes;
   } catch (error) {
     console.error("parseDiff: Error while parsing diff:", error);
   }
