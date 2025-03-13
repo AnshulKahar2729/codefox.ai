@@ -8,11 +8,13 @@ export async function processPR(prUrl: string): Promise<void> {
     const diffResponse = await axios.get(`${prUrl}.diff`, {
       headers: { Authorization: `token ${process.env.GITHUB_TOKEN}` },
     });
+    console.log("Diff response:", diffResponse.status, diffResponse.statusText);
     const diff = diffResponse.data;
+    console.log("Diff:", diff);
 
     // Parse diff changes
     const changes = parseDiff(diff);
-
+    console.log("Changes:", changes);
     if (changes.length === 0) {
       await postFeedback(prUrl, "No significant changes detected in this PR.");
       return;
@@ -20,18 +22,22 @@ export async function processPR(prUrl: string): Promise<void> {
 
     // AI analysis for PR
     const feedback = await analyzeDiff(changes);
+    console.log("Feedback:", feedback);
 
     // Generate Mermaid diagrams
     const changeFlowchart = generateChangeFlowchart(changes);
+    console.log("Change Flowchart:", changeFlowchart);
     const logicalFlowchart = await generateLogicalFlow(changes); // AI-based logical diagram
+    console.log("Logical Flowchart:", logicalFlowchart);
 
     // Post feedback with AI analysis & diagrams
     await postFeedback(
       prUrl,
       `### PR Analysis\n\n${feedback}\n\n### Change Flowchart\n\`\`\`mermaid\n${changeFlowchart}\n\`\`\`\n\n### Logical Flow\n\`\`\`mermaid\n${logicalFlowchart}\n\`\`\``
     );
+    
   } catch (error) {
-    console.error("PR processing failed:", (error as Error).message);
+    console.error("PR processing failed:", "Error:", JSON.stringify(error, null, 2));
   }
 }
 
