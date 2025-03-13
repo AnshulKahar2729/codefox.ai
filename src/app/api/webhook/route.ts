@@ -6,7 +6,7 @@ export async function POST(req: NextRequest) {
   try {
     // Read request body
     const body = await req.json();
-    console.log("Webhook payload:", body);
+    // console.log("Webhook payload:", body);
 
     // Validate request method
     if (req.method !== "POST") {
@@ -17,7 +17,8 @@ export async function POST(req: NextRequest) {
     }
 
     // Validate webhook secret
-    const signature = req.headers.get("x-hub-signature-256") || "";
+    const signature = req.headers.get("X-Hub-Signature-256") || "";
+    console.log("Received signature:", signature);
     const secret = process.env.WEBHOOK_SECRET;
     if (!secret) {
       return NextResponse.json(
@@ -25,12 +26,14 @@ export async function POST(req: NextRequest) {
         { status: 500 }
       );
     }
+    console.log("Expected signature:", secret);
 
     // Validate signature
     const hmac = crypto
       .createHmac("sha256", secret)
       .update(JSON.stringify(body))
       .digest("hex");
+    console.log("Computed HMAC:", hmac);
     if (`sha256=${hmac}` !== signature) {
       return NextResponse.json(
         { message: "Invalid signature" },
@@ -39,7 +42,7 @@ export async function POST(req: NextRequest) {
     }
 
     // Get event type from headers
-    const event = req.headers.get("x-github-event");
+    const event = req.headers.get("X-GitHub-Event");
     if (!event) {
       return NextResponse.json(
         { message: "Missing GitHub event header" },
