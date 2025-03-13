@@ -16,7 +16,7 @@ export async function postFeedback(
   const commentUrl = `https://api.github.com/repos/${user}/${repo}/issues/${prNumber}/comments`;
   console.log("Comment URL:", commentUrl);
   console.log("GitHub Token:", githubToken);
-  try {
+  try { 
     const { data } = await axios.post(
       commentUrl,
       { body },
