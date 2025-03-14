@@ -1,5 +1,5 @@
 import axios from "axios";
-import { analyzeDiff, generateLogicalFlow } from "./ai"; // AI-based logical flow generation
+import { analyzeDiff } from "./ai"; // AI-based logical flow generation
 // import { generateLogicalFlow } from "./ai";
 import { postFeedback } from "./feedback";
 
