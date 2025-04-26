@@ -62,7 +62,7 @@ export default function Home() {
             <div className="flex flex-col sm:flex-row gap-4 min-[400px]:gap-2">
               <Button size="lg">
                 <a
-                  href="https://github.com/marketplace/ai-codefox"
+                  href="https://github.com/apps/ai-codefox"
                   target="_blank"
                   className="gap-2 flex flex-row items-center"
                 >
